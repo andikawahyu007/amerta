@@ -362,23 +362,11 @@ import MinifyScanner from '../scanners/MinifyScanner';
 						.getElementById( 'wphb-ao-' + this.value + '-label' )
 						.classList.remove( 'active' );
 
-					if ( 'auto' === current && 'manual' === this.value ) {
-						window.SUI.openModal(
-							'wphb-advanced-minification-modal',
-							'wphb-switch-to-advanced',
-							'wphb-switch-to-advanced',
-							false
-						);
-						return;
-					}
-
 					if ( 'manual' === current && 'auto' === this.value ) {
 						if ( true === wphb.minification.get.showSwitchModal ) {
 							window.SUI.openModal(
 								'wphb-basic-minification-modal',
-								'wphb-switch-to-basic',
-								'wphb-switch-to-basic',
-								false
+								'wphb-switch-to-basic'
 							);
 						} else {
 							WPHB_Admin.minification.switchView( 'basic' );
@@ -510,13 +498,13 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			// Filter search box
 			const filterInput = $( '#wphb-s' );
 			// Prevent enter submitting form to rescan files.
-			filterInput.keydown( function ( e ) {
+			filterInput.on( 'keydown', function ( e ) {
 				if ( 13 === e.keyCode ) {
 					event.preventDefault();
 					return false;
 				}
 			} );
-			filterInput.keyup( function () {
+			filterInput.on( 'keyup', function () {
 				self.rowsCollection.addFilter( $( this ).val(), 'primary' );
 				self.rowsCollection.applyFilters();
 			} );
@@ -650,10 +638,8 @@ import MinifyScanner from '../scanners/MinifyScanner';
 		 * Called from switch view modal.
 		 *
 		 * @param {string}  mode
-		 * @param {boolean} clear    Clear settings or not.
-		 * @param {boolean} refresh  Refresh page.
 		 */
-		switchView( mode, clear = false, refresh = true ) {
+		switchView( mode ) {
 			let hide = false;
 			const trackBox = document.getElementById(
 				'hide-' + mode + '-modal'
@@ -663,10 +649,8 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				hide = true;
 			}
 
-			Fetcher.minification.toggleView( mode, clear, hide ).then( () => {
-				if ( refresh ) {
-					window.location.href = getLink( 'minification' );
-				}
+			Fetcher.minification.toggleView( mode, hide ).then( () => {
+				window.location.href = getLink( 'minification' );
 			} );
 		},
 

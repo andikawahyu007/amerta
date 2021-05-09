@@ -1,6 +1,6 @@
 === Hummingbird – Optimize Speed, Enable Cache, Minify CSS & Defer Critical JS ===
 Plugin Name: Hummingbird – Optimize Speed, Enable Cache, Minify CSS & Defer Critical JS
-Version: 2.7.2
+Version: 2.7.4
 Author: WPMU DEV
 Author URI: https://wpmudev.com/
 Contributors: WPMUDEV
@@ -8,7 +8,7 @@ Tags: defer css javascript, cache, minify css, minify javascript, speed up wordp
 Requires at least: 5.2
 Tested up to: 5.7
 Requires PHP: 5.6
-Stable tag: 2.7.2
+Stable tag: 2.7.4
 License: GPLv2
 License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -177,6 +177,35 @@ Asset Optimization is a great way to speed up your site but moving, combining, u
 4. Use suggestions to make improvements and speed up your site.
 
 == Changelog ==
+
+= 2.7.4 ( 2021-04-28) =
+
+- Fix broken package on wp.org
+
+= 2.7.3 ( 2021-03-12 ) =
+
+- New: Tutorials module
+- New: LiteSpeed instructions for Browser Caching module
+- Enhance: Update the Plugin Health module UI/UX
+- Enhance: REST API endpoints now require at least edit_posts capability
+- Enhance: Uptime reporting description
+- Enhance: Improve export/import description
+- Enhance: CSS above the fold description
+- Enhance: Privacy mode detection in GZIP compression module
+- Enhance: Asset Optimization UI/UX
+- Enhance: Asset Optimization processing of compressed assets
+- Enhance: Asset Optimization switching between modes
+- Enhance: Support for RGBA when optimizing CSS files
+- Enhance: Fallback to siteurl if HTTP_HOST is not defined when clearing cache
+- Fix: Recursive loops in Page Caching preloader
+- Fix: Asset Optimization not rewriting relative paths for inlined assets
+- Fix: Remove unused expiry time option for IIS servers in browser caching module
+- Fix: Page caching not properly detecting Asset Optimization CDN status
+- Fix: Page caching clearing all cache when static page is set as home page
+- Fix: Selects overlapping other DOM elements
+- Fix: PHP notice when re-checking browser caching status
+- Fix: PHP notice for undefined index db_frequency
+- Fix: Performance test notices on mobile
 
 = 2.7.2 ( 2021-02-25 ) =
 

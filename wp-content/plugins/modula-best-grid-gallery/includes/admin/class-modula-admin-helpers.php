@@ -6,7 +6,7 @@ class Modula_Admin_Helpers {
 	/**
 	 * Holds the class object.
 	 *
-	 * @since 2.4.2
+	 * @since 2.5.0
 	 *
 	 * @var object
 	 */
@@ -15,19 +15,16 @@ class Modula_Admin_Helpers {
 	/**
 	 * Modula_Admin_Helpers constructor.
 	 *
-	 * @since 2.4.2
+	 * @since 2.5.0
 	 */
-	function __construct() {
-		// added by Cristi
-		add_filter( 'screen_options_show_screen', array( $this, 'modula_hide_screen_options' ) );
-	}
+	function __construct() {}
 
 
 	/**
 	 * Returns the singleton instance of the class.
 	 *
 	 * @return object The Modula_Admin_Helpers object.
-	 * @since 2.4.2
+	 * @since 2.5.0
 	 */
 	public static function get_instance() {
 
@@ -116,20 +113,6 @@ class Modula_Admin_Helpers {
 		}
 	}
 
-	/**
-	 * Hide screen options when on Modula's CPT
-	 *
-	 * @since 2.4.2
-	 */
-	public function modula_hide_screen_options() {
-		global $pagenow;
-
-		if ( $pagenow === 'modula-gallery' ) {
-			__return_false();
-		} else {
-			__return_true();
-		}
-	}
 }
 
 $modula_admin_helpers = Modula_Admin_Helpers::get_instance();

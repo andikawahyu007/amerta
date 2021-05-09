@@ -184,7 +184,7 @@ class Hub {
 		$options = $module->get_options();
 
 		$result['db-cleanup']['status']    = $options['db_cleanups'];
-		$result['db-cleanup']['frequency'] = $options['db_frequency'];
+		$result['db-cleanup']['frequency'] = isset( $options['db_frequency'] ) ? $options['db_frequency'] : 7;
 
 		/**
 		 * Advanced tools.

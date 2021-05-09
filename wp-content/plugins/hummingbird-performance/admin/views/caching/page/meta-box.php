@@ -7,6 +7,7 @@
  * @var bool          $admins_can_disable  Blog admins can disable page caching.
  * @var bool          $blog_is_frontpage   Is the Blog set as the Frontpage.
  * @var bool          $can_compress        Can enable compression.
+ * @var bool          $cdn_active          Asset optimization CDN status.
  * @var array         $clear_interval      Clear interval array. Format [ (int) hours, (string) hours|days ].
  * @var array         $custom_post_types   Array of custom post types.
  * @var string        $deactivate_url      Deactivate URL.
@@ -31,7 +32,7 @@ if ( is_wp_error( $error ) ) {
 	$this->admin_notices->show_inline( $error->get_error_message(), 'error' );
 } else {
 	$notice = esc_html__( 'Page caching is currently active.', 'wphb' );
-	if ( $minify_active ) {
+	if ( $minify_active && $cdn_active ) {
 		$notice = esc_html__( 'Page caching is currently active. You are storing your assets on the CDN in the Asset Optimization module. Hummingbird will automatically purge your cache when assets on the CDN expire (after every two months).', 'wphb' );
 	}
 

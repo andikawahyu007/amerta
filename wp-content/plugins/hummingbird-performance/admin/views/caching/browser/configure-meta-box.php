@@ -48,6 +48,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 		if ( ! $cf_active && ! $show_cf_notice ) {
 			$servers = Module_Server::get_servers();
+
+			$servers['apache']    = 'Apache';
+			$servers['litespeed'] = 'Open LiteSpeed';
+
 			$this->admin_notices->show_inline(
 				sprintf( /* translators: %1$s: server type, %2$s: opening a tag, %3$s: closing a tag */
 					esc_html__( "We've automatically detected your server type is %1\$s. If this is incorrect, manually select your server type to generate the relevant rules and instructions. If you are using Cloudflare %2\$sconnect your account%3\$s to control your cache settings from here.", 'wphb' ),
@@ -67,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<div class="sui-box-settings-row">
+<div class="sui-box-settings-row" id="wphb-expiry-time-row">
 	<div class="sui-box-settings-col-1">
 		<span class="sui-settings-label"><?php esc_html_e( 'Expiry Time', 'wphb' ); ?></span>
 		<span class="sui-description">
@@ -246,12 +250,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div>
 						<div class="apache-instructions">
 							<p>
-								<?php esc_html_e( 'Follow the steps below to add browser caching to your Apache/LiteSpeed server.', 'wphb' ); ?>
+								<?php esc_html_e( 'Follow the steps below to add browser caching to your Apache server.', 'wphb' ); ?>
 							</p>
 
 							<ol class="wphb-listing wphb-listing-ordered">
 								<li><?php esc_html_e( 'Copy the generated code into your .htaccess file & save your changes.', 'wphb' ); ?></li>
-								<li><?php esc_html_e( 'Restart Apache/LiteSpeed.', 'wphb' ); ?></li>
+								<li><?php esc_html_e( 'Restart Apache.', 'wphb' ); ?></li>
 								<li><a href="<?php echo esc_url( $recheck_expiry_url ); ?>"><?php esc_html_e( 'Re-check expiry status.', 'wphb' ); ?></a></li>
 							</ol>
 
@@ -313,6 +317,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 					);
 					?>
 				</p>
+			<?php endif; ?>
+		</div>
+
+		<div id="wphb-server-instructions-litespeed" class="wphb-server-instructions sui-hidden" data-server="litespeed">
+			<?php if ( $already_enabled ) : ?>
+				<?php $this->admin_notices->show_inline( esc_html__( 'Your browser caching is already enabled and working well', 'wphb' ) ); ?>
+			<?php elseif ( $htaccess_writable && $htaccess_written ) : ?>
+				<?php
+				$this->admin_notices->show_inline(
+					esc_html__( 'Automatic browser caching is active.', 'wphb' ),
+					'info'
+				);
+				?>
+			<?php else : ?>
+				<p>
+					<?php esc_html_e( 'Follow the steps below to add browser caching to your Open LiteSpeed server.', 'wphb' ); ?>
+				</p>
+
+				<ol class="wphb-listing wphb-listing-ordered">
+					<li>
+						<?php
+						printf( /* translators: %1$s - opening strong tag, %2$s - closing strong tag, %3$s: Link to TechNet */
+							__( 'Manually configure the %1$sCache-Control%2$s header for browser caching in your WebAdmin Console following the Open LiteSpeed guide <a href="%3$s" target="_blank">here</a>.', 'wphb' ),
+							'<strong>',
+							'</strong>',
+							'https://openlitespeed.org/kb/how-to-set-up-custom-headers/'
+						);
+						?>
+					</li>
+					<li>
+						<?php
+						printf( /* translators: %1$s - opening strong tag, %2$s - closing strong tag */
+							esc_html__( 'Set Expires by Type to %1$s31536000 (1 year)%2$s to meet Google’s recommended benchmark.', 'wphb' ),
+							'<strong>',
+							'</strong>'
+						);
+						?>
+					</li>
+				</ol>
 			<?php endif; ?>
 		</div>
 

@@ -10,7 +10,6 @@ namespace Hummingbird\Core\Modules;
 use Hummingbird\Core\Filesystem;
 use Hummingbird\Core\Module;
 use Hummingbird\Core\Settings;
-use Hummingbird\Core\Utils;
 use WP_Customize_Manager;
 use WP_Scripts;
 use WP_Styles;
@@ -946,13 +945,13 @@ class Minify extends Module {
 
 			// Reset the minification settings.
 			if ( $reset_minify ) {
-				$options['dont_minify'] = $default_options['minify']['dont_minify'];
+				$options['dont_minify']  = $default_options['minify']['dont_minify'];
+				$options['dont_combine'] = $default_options['minify']['dont_combine'];
 			}
-			$options['block']        = $default_options['minify']['block'];
-			$options['dont_combine'] = $default_options['minify']['dont_combine'];
-			$options['position']     = $default_options['minify']['position'];
-			$options['defer']        = $default_options['minify']['defer'];
-			$options['inline']       = $default_options['minify']['inline'];
+			$options['block']    = $default_options['minify']['block'];
+			$options['position'] = $default_options['minify']['position'];
+			$options['defer']    = $default_options['minify']['defer'];
+			$options['inline']   = $default_options['minify']['inline'];
 			$this->update_options( $options );
 		}
 
@@ -1435,21 +1434,6 @@ class Minify extends Module {
 			'success' => true,
 			'message' => __( 'Settings updated', 'wphb' ),
 		);
-	}
-
-	/**
-	 * Improved HTTP2 check method.
-	 *
-	 * @since 2.4.0  Refactored from Utils::get_http2_status()
-	 *
-	 * @return bool
-	 */
-	public function is_http2() {
-		if ( 'HTTP/2.0' === wp_get_server_protocol() ) {
-			return true;
-		}
-
-		return Utils::get_api()->minify->is_http2();
 	}
 
 	/**

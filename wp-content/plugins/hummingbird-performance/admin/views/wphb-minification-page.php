@@ -51,7 +51,9 @@ $this->do_meta_boxes( 'summary' );
 	<?php
 endif;
 
-$this->modal( 'minification-advanced' );
+if ( get_option( 'wphb-minification-show-advanced_modal' ) ) {
+	$this->modal( 'minification-advanced' );
+}
 $this->modal( 'automatic-ao-how-does-it-work' );
 $this->modal( 'manual-ao-how-does-it-work' );
 

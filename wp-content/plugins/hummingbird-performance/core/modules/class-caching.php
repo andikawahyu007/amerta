@@ -147,9 +147,10 @@ class Caching extends Module_Server {
 			if ( ! is_wp_error( $api_results ) ) {
 				$api_results = get_object_vars( $api_results );
 
-				foreach ( $files as $type  => $file ) {
-					if ( ! isset( $api_results[ $type ]->response_error ) && ! isset( $api_results[ $type ]->http_request_failed ) && absint( $api_results[ $type ] ) > 0 ) {
-						$results[ $type ] = absint( $api_results[ $type ] );
+				foreach ( $files as $type => $file ) {
+					$ltype = strtolower( $type );
+					if ( ! isset( $api_results[ $ltype ]->response_error ) && ! isset( $api_results[ $ltype ]->http_request_failed ) && absint( $api_results[ $ltype ] ) > 0 ) {
+						$results[ $type ] = absint( $api_results[ $ltype ] );
 					}
 				}
 			}

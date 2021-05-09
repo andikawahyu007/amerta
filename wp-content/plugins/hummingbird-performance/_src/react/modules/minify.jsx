@@ -244,6 +244,7 @@ class AutoMinifyPage extends React.Component {
 					reCheckFiles={ this.reCheckFiles }
 					view={ this.state.view }
 					handleToggleChange={ this.handleToggleChange }
+					showModal={ this.props.wphbData.module.showModal }
 				/>
 				<Configurations
 					link={ this.state.links }

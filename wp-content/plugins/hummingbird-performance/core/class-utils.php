@@ -180,9 +180,11 @@ class Utils {
 				'dismissLabel'           => __( 'Dismiss', 'wphb' ),
 				'successAdvPurgeCache'   => __( 'Preload cache purged successfully.', 'wphb' ),
 				'successAdvPurgeMinify'  => __( 'All database data and Custom Post Type information related to Asset Optimization has been cleared successfully.', 'wphb' ),
+				'successAoOrphanedPurge' => __( 'Database entries removed successfully.', 'wphb' ),
 			),
 			'links'      => array(
 				'audits'        => self::get_admin_menu_url( 'performance' ) . '&view=audits',
+				'tutorials'     => self::get_admin_menu_url( 'tutorials' ),
 				'disableUptime' => add_query_arg(
 					array(
 						'action'   => 'disable',
@@ -224,6 +226,10 @@ class Utils {
 					),
 				)
 			);
+		}
+
+		if ( ! apply_filters( 'wpmudev_branding_hide_doc_link', false ) && $minify_module->is_on_page( true ) ) {
+			wp_enqueue_script( 'wphb-react-tutorials', WPHB_DIR_URL . 'admin/assets/js/wphb-react-tutorials.min.js', array( 'wp-i18n' ), WPHB_VERSION, true );
 		}
 
 		global $wpdb, $wp_version;
@@ -429,9 +435,17 @@ class Utils {
 		<select class="sui-select" name="wphb-server-type" id="wphb-server-type" class="server-type">
 			<?php foreach ( Module_Server::get_servers() as $server => $server_name ) : ?>
 				<option value="<?php echo esc_attr( $server ); ?>" <?php selected( $server, $selected ); ?>>
-					<?php echo esc_html( $server_name ); ?>
+					<?php
+					if ( 'Apache/LiteSpeed' === $server_name ) {
+						$server_name = 'Apache';
+					}
+					echo esc_html( $server_name );
+					?>
 				</option>
 			<?php endforeach; ?>
+			<option value="litespeed" <?php selected( 'litespeed', $selected ); ?>>
+				Open LiteSpeed
+			</option>
 		</select>
 		<?php
 	}
@@ -657,6 +671,9 @@ class Utils {
 				break;
 			case 'wpmudev':
 				$link = "{$domain}/{$utm_tags}";
+				break;
+			case 'tutorials':
+				$link = "{$domain}/blog/tutorials/tutorial-category/hummingbird-pro/{$utm_tags}";
 				break;
 			default:
 				$link = '';

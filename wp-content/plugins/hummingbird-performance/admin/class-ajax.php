@@ -37,6 +37,9 @@ class AJAX {
 			return;
 		}
 
+		// React. Hide tutorials.
+		add_action( 'wp_ajax_wphb_react_hide_tutorials', array( $this, 'hide_tutorials' ) );
+
 		// Parse clear cache click from frontend admin bar.
 		add_action( 'wp_ajax_wphb_front_clear_cache', array( $this, 'clear_frontend_cache' ) );
 		// Parse clear full cache from admin notice.
@@ -330,6 +333,19 @@ class AJAX {
 		if ( ! $status ) {
 			wp_send_json_error();
 		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * Hide tutorials on dashboard page.
+	 *
+	 * @since 2.7.3
+	 */
+	public function hide_tutorials() {
+		check_ajax_referer( 'wphb-fetch' );
+
+		update_option( 'wphb-hide-tutorials', true, false );
 
 		wp_send_json_success();
 	}
@@ -764,7 +780,7 @@ class AJAX {
 		}
 
 		$preloader = new Preload();
-		$preloader->cancel();
+		$preloader->cancel_process();
 		wp_send_json_success();
 	}
 
@@ -1421,11 +1437,6 @@ class AJAX {
 			delete_option( 'wphb-minification-show-advanced_modal' );
 		}
 
-		$clear = filter_input( INPUT_POST, 'clear', FILTER_VALIDATE_BOOLEAN );
-		if ( true === $clear ) {
-			Utils::get_module( 'minify' )->clear_cache( true, true, true );
-		}
-
 		wp_send_json_success();
 	}
 
@@ -1831,7 +1842,7 @@ class AJAX {
 		}
 
 		$preloader = new Preload();
-		$preloader->force_clear();
+		$preloader->clear_all_queue();
 
 		wp_send_json_success();
 	}

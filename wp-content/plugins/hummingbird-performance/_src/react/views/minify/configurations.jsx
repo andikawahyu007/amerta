@@ -184,6 +184,11 @@ export default class Configurations extends React.Component {
 										<Button
 											url="https://forms.gle/7iwfSxTd21kn5pdT6"
 											target="_blank"
+											classes="sui-button"
+											style={ {
+												color: '#fff',
+												marginTop: '10px',
+											} }
 											text={ __(
 												'Vote for the next Preset'
 											) }

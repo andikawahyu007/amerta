@@ -266,8 +266,6 @@ class Advanced extends Page {
 	public function site_health_metabox() {
 		$advanced_module = Utils::get_module( 'advanced' );
 
-		$db = $advanced_module->get_db_size();
-
 		$minify_groups  = Minify_Group::get_minify_groups();
 		$orphaned_metas = $advanced_module->get_orphaned_ao() - 18 * count( $minify_groups );
 
@@ -276,11 +274,9 @@ class Advanced extends Page {
 		$this->view(
 			'advanced/site-health-meta-box',
 			array(
-				'data_size'      => $db['data_size'],
-				'index_size'     => $db['index_size'],
 				'minify_groups'  => $minify_groups,
 				'orphaned_metas' => $orphaned_metas,
-				'preloading'     => Settings::get_setting( 'preload', 'page_cache' ) || get_transient( 'wphb-preloading' ),
+				'preloading'     => Settings::get_setting( 'preload', 'page_cache' ) || $preloader->is_process_running(),
 				'queue_size'     => $preloader->get_queue_size(),
 			)
 		);

@@ -14,7 +14,6 @@ namespace Hummingbird\Core\Modules;
 use Hummingbird\Core\Module;
 use Hummingbird\Core\Settings;
 use Hummingbird\Core\Traits\Module as ModuleContract;
-use Hummingbird\Core\Utils;
 use stdClass;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -708,39 +707,6 @@ class Advanced extends Module {
 		} else {
 			return __( 'TRUE', 'wphb' );
 		}
-	}
-
-	/**
-	 * Get database data and index sizes.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @return array
-	 */
-	public function get_db_size() {
-		global $wpdb;
-
-		if ( ! defined( 'DB_NAME' ) ) {
-			return array(
-				'data_size'  => 0,
-				'index_size' => 0,
-			);
-		}
-
-		$table_info = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT SUM( DATA_LENGTH ) as data, SUM( INDEX_LENGTH ) as 'index'
-					   FROM information_schema.TABLES
-					   WHERE TABLE_SCHEMA = %s AND TABLE_NAME LIKE %s;",
-				DB_NAME,
-				$wpdb->get_blog_prefix( get_current_blog_id() ) . '%'
-			)
-		); // DB call ok; no-cache ok.
-
-		return array(
-			'data_size'  => Utils::format_bytes( $table_info->data ),
-			'index_size' => Utils::format_bytes( $table_info->index ),
-		);
 	}
 
 	/**

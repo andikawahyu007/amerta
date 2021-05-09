@@ -179,38 +179,16 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 			if ( purgeBtn ) {
 				purgeBtn.addEventListener( 'click', () => this.purgeDb() );
 			}
-			const purgeIcon = document.getElementById( 'icon-cache-purge' );
-			if ( purgeIcon ) {
-				purgeIcon.addEventListener( 'click', () => this.purgeDb() );
-			}
 
 			/**
 			 * Purge asset optimization on plugin health page.
 			 *
 			 * @since 2.7.0
 			 */
-			const purgeAOIcon = document.getElementById( 'icon-minify-purge' );
-			if ( purgeAOIcon ) {
-				purgeAOIcon.addEventListener( 'click', () =>
+			const purgeAObtn = document.getElementById( 'btn-minify-purge' );
+			if ( purgeAObtn ) {
+				purgeAObtn.addEventListener( 'click', () =>
 					this.purgeDb( 'minify' )
-				);
-			}
-
-			/**
-			 * Show modal.
-			 *
-			 * @since 2.7.0
-			 */
-			const modalTrigger = document.getElementById(
-				'icon-ao-orphan-purge'
-			);
-			if ( modalTrigger ) {
-				modalTrigger.addEventListener( 'click', () =>
-					window.SUI.openModal(
-						'site-health-orphaned-modal',
-						'icon-minify-purge',
-						'site-health-orphaned-clear'
-					)
 				);
 			}
 
@@ -411,20 +389,17 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 		 */
 		purgeDb( type = 'cache' ) {
 			const button = document.getElementById( 'btn-' + type + '-purge' );
-			const icon = document.getElementById( 'icon-' + type + '-purge' );
 
-			if ( button ) {
-				button.classList.toggle( 'sui-button-onload-text' );
+			if ( ! button ) {
+				return;
 			}
-			icon.classList.toggle( 'sui-button-onload' );
+
+			button.classList.add( 'sui-button-onload-text' );
 
 			Fetcher.common.call( 'wphb_advanced_purge_' + type ).then( () => {
 				document.getElementById( 'count-' + type ).innerHTML = '0';
 
-				if ( button ) {
-					button.classList.toggle( 'sui-button-onload-text' );
-				}
-				icon.classList.toggle( 'sui-button-onload' );
+				button.classList.remove( 'sui-button-onload-text' );
 
 				const str =
 					'successAdvPurge' +

@@ -15,6 +15,11 @@ button.notice-dismiss {
     cursor: pointer !important;
 }
 
+// Fix select overlapping other elements.
+.wpmud .sui-select.sui-select-dropdown-container--open {
+    z-index: 999;
+}
+
 .wpmud .wphb-dismiss {
     float: right;
 }

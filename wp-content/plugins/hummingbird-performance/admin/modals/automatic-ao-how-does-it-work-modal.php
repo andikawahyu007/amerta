@@ -168,7 +168,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="sui-accordion-item-body">
 						<div class="sui-box">
 							<div class="sui-box-body">
-								<p><?php esc_html_e( 'Hummingbird will auto-detect newly added plugin and theme files and compress them for you. However, to avoid conflicts and issues, Hummingbird won’t remove any old files which were removed from a plugin or theme. That’s why we recommend file scanning once in a while to keep everything in sync.', 'wphb' ); ?></p>
+								<p><?php esc_html_e( 'Hummingbird will auto-detect newly added plugin and theme files and optimize them for you. However, to avoid conflicts and issues, Hummingbird won’t remove any old files which were removed from a plugin or theme. That’s why we recommend file scanning once in a while to keep everything in sync.', 'wphb' ); ?></p>
 							</div>
 						</div>
 					</div>

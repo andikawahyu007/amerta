@@ -31,6 +31,16 @@ import SideTabs from '../../components/sui-side-tabs';
  */
 export default class Assets extends React.Component {
 	/**
+	 * Component constructor.
+	 *
+	 * @param {Object} props
+	 */
+	constructor( props ) {
+		super( props );
+		this.onManualClick = this.onManualClick.bind( this );
+	}
+
+	/**
 	 * Component header.
 	 *
 	 * @return {JSX.Element}  Header action buttons.
@@ -78,6 +88,15 @@ export default class Assets extends React.Component {
 	 * Show "How does it work" modal.
 	 */
 	showHowDoesItWork() {
+		// Reset tab selection.
+		const label = document.getElementById( 'hdw-auto-trigger-label' );
+		if ( label ) {
+			label.classList.add( 'active' );
+			document
+				.getElementById( 'hdw-manual-trigger-label' )
+				.classList.remove( 'active' );
+		}
+
 		SUI.openModal(
 			'automatic-ao-hdiw-modal-content',
 			'wphb-basic-hdiw-link'
@@ -88,12 +107,14 @@ export default class Assets extends React.Component {
 	 * Handle "Manual" button click.
 	 */
 	onManualClick() {
-		SUI.openModal(
-			'wphb-advanced-minification-modal',
-			'wphb-switch-to-advanced',
-			'wphb-switch-to-advanced',
-			false
-		);
+		if ( this.props.showModal ) {
+			SUI.openModal(
+				'wphb-advanced-minification-modal',
+				'wphb-switch-to-advanced'
+			);
+		} else {
+			window.WPHB_Admin.minification.switchView( 'advanced' );
+		}
 	}
 
 	/**
@@ -116,12 +137,13 @@ export default class Assets extends React.Component {
 						<div className="wphb-ao-type-title">
 							<strong>{ __( 'Speedy' ) }</strong>
 							<Tag value={ __( 'Recommended' ) } type="sm" />
-							<small>
-								{ __(
-									'Automatically optimize and compress all files.'
-								) }
-							</small>
 						</div>
+
+						<small>
+							{ __(
+								'Speedy Optimization goes beyond just compressing your files by also auto-combining smaller files together. This can help to decrease the number of requests made when a page is loaded.'
+							) }
+						</small>
 
 						<Action
 							type="right"
@@ -159,12 +181,13 @@ export default class Assets extends React.Component {
 
 						<div className="wphb-ao-type-title">
 							<strong>{ __( 'Basic' ) }</strong>
-							<small>
-								{ __(
-									'Apply basic compression to all files.'
-								) }
-							</small>
 						</div>
+
+						<small>
+							{ __(
+								'Basic Optimization will optimize your files by compressing them. This helps to improve site speed by de-cluttering CSS and JavaScript files, and by generating a faster version of each file.'
+							) }
+						</small>
 
 						<Action
 							type="right"

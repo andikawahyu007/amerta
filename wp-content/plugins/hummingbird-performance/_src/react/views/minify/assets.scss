@@ -1,7 +1,8 @@
 @import "~@wpmudev/shared-ui/scss/functions";
 @import "~@wpmudev/shared-ui/scss/colors";
 @import "~@wpmudev/shared-ui/scss/variables";
-@import '~@wpmudev/shared-ui/scss/mixins';
+@import "~@wpmudev/shared-ui/scss/mixins";
+@import "../../../scss/common/mixins";
 
 @include body-class(true) {
 
@@ -22,13 +23,21 @@
         border: 1px solid #DDDDDD;
         background-color: #F8F8F8;
 
-        .sui-box-header { border-bottom: 0 }
+        .sui-box-header { border-bottom: 0; }
 
         .wphb-ao-type-icon { background-color: #AAAAAA; }
         .wphb-ao-type-title strong { color: #888888; }
       }
 
-      .sui-box .sui-box-header { padding: 30px; }
+      .sui-box .sui-box-header {
+        padding: 30px;
+        align-items: flex-start;
+
+        @include bp(phone-large) {
+          flex-wrap: wrap;
+          .sui-actions-right { order: 3; }
+        }
+      }
     }
 
     .wphb-ao-type-icon {
@@ -47,18 +56,32 @@
 
     .wphb-ao-type-title {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
+      flex-basis: 235px;
+      @include bp(phone-large) {
+        flex-basis: auto;
+      }
 
       strong {
         font-size: 14px;
-        line-height: 19px
+        line-height: 19px;
+        margin-right: 5px;
       }
 
-      small {
-        color: #AAAAAA;
+      .sui-tag {
+        margin-right: 10px;
+      }
+    }
+
+    small {
+      color: #AAAAAA;
+      flex-basis: 100%;
+      margin: 0 30px 0 0;
+
+      @include bp(phone-large) {
         flex-basis: 100%;
-        margin: 0;
+        margin: 10px 0 0 0;
+        order: 5;
       }
     }
   }

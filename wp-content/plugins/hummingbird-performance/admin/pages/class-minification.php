@@ -137,6 +137,7 @@ class Minification extends Page {
 				'module'   => array(
 					'isDivi'         => Divi::is_divi_theme_active(),
 					'isWhiteLabeled' => apply_filters( 'wpmudev_branding_hide_branding', false ),
+					'showModal'      => (bool) get_option( 'wphb-minification-show-advanced_modal' ),
 				),
 			)
 		);
@@ -169,13 +170,15 @@ class Minification extends Page {
 		if ( isset( $_POST['submit'] ) ) { // Input var okay.
 			check_admin_referer( 'wphb-enqueued-files' );
 
-			$minify_module = Utils::get_module( 'minify' );
-			$options       = $minify_module->get_options();
+			$options = Utils::get_module( 'minify' )->get_options();
+			if ( ! empty( $_POST['styles'] ) ) {
+				$options = $this->sanitize_type( 'styles', $options );
+			}
+			if ( ! empty( $_POST['scripts'] ) ) {
+				$options = $this->sanitize_type( 'scripts', $options );
+			}
 
-			$options = $this->_sanitize_type( 'styles', $options );
-			$options = $this->_sanitize_type( 'scripts', $options );
-
-			$minify_module->update_options( $options );
+			Utils::get_module( 'minify' )->update_options( $options );
 
 			// Remove notice.
 			delete_site_option( 'wphb-notice-minification-optimized-show' );
@@ -361,7 +364,7 @@ class Minification extends Page {
 		if ( 'advanced' === $this->mode ) {
 			$this->add_meta_box(
 				'minification/enqueued-files',
-				__( 'Files', 'wphb' ),
+				__( 'Assets', 'wphb' ),
 				array( $this, 'enqueued_files_metabox' ),
 				null,
 				null,
@@ -592,158 +595,78 @@ class Minification extends Page {
 	 *
 	 * @return mixed
 	 */
-	private function _sanitize_type( $type, $options ) {
-		$minify          = Utils::get_module( 'minify' );
-		$current_options = $minify->get_options();
+	private function sanitize_type( $type, $options ) {
+		$set_asset_options = array(
+			'block'        => 'include',
+			'dont_minify'  => 'minify',
+			'dont_combine' => 'combine',
+		);
 
-		// We'll save what groups have changed so we reset the cache for those groups.
-		$changed_groups = array();
+		$unset_asset_options = array( 'defer', 'inline' );
 
-		if ( ! empty( $_POST[ $type ] ) ) { // Input var okay.
-			foreach ( wp_unslash( $_POST[ $type ] ) as $handle => $item ) { // Input var okay.
-				$key = array_search( $handle, $options['block'][ $type ], true );
-				if ( ! isset( $item['include'] ) ) {
-					$options['block'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['block'][ $type ][ $key ] );
-				}
-				$options['block'][ $type ] = array_unique( $options['block'][ $type ] );
-				$diff                      = array_merge(
-					array_diff( $current_options['block'][ $type ], $options['block'][ $type ] ),
-					array_diff( $options['block'][ $type ], $current_options['block'][ $type ] )
-				);
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+		$changed_assets = array();
+
+		$collection = Minify\Sources_Collector::get_collection();
+
+		$assets = filter_input( INPUT_POST, $type, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
+		foreach ( $assets as $handle => $item ) {
+			foreach ( $set_asset_options as $stored_option => $selected_option ) {
+				// Make sure we do not force exclude already compressed assets.
+				$minified = false;
+				if ( 'minify' === $selected_option ) {
+					$full_src = $collection[ $type ][ $handle ]['src'];
+					$minified = preg_match( '/\.min\.(css|js)/', $full_src );
 				}
 
-				$key = array_search( $handle, $options['dont_minify'][ $type ], true );
-				if ( ! isset( $item['minify'] ) ) {
-					$options['dont_minify'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['dont_minify'][ $type ][ $key ] );
+				$key = array_search( $handle, $options[ $stored_option ][ $type ], true );
+				if ( ! isset( $item[ $selected_option ] ) && false === $key && ! $minified ) {
+					$options[ $stored_option ][ $type ][] = $handle;
+					array_push( $changed_assets, $handle );
+				} elseif ( isset( $item[ $selected_option ] ) && false !== $key ) {
+					unset( $options[ $stored_option ][ $type ][ $key ] );
+					array_push( $changed_assets, $handle );
 				}
-				$options['dont_minify'][ $type ] = array_unique( $options['dont_minify'][ $type ] );
-				$diff                            = array_merge(
-					array_diff( $current_options['dont_minify'][ $type ], $options['dont_minify'][ $type ] ),
-					array_diff( $options['dont_minify'][ $type ], $current_options['dont_minify'][ $type ] )
-				);
+			}
 
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+			foreach ( $unset_asset_options as $option ) {
+				$key = array_search( $handle, $options[ $option ][ $type ], true );
+				if ( ! isset( $item[ $option ] ) && false !== $key ) {
+					unset( $options[ $option ][ $type ][ $key ] );
+					array_push( $changed_assets, $handle );
+					continue;
+				} elseif ( isset( $item[ $option ] ) && false === $key ) {
+					$options[ $option ][ $type ][] = $handle;
+					array_push( $changed_assets, $handle );
 				}
+			}
 
-				$key = array_search( $handle, $options['dont_combine'][ $type ], true );
-				if ( ! isset( $item['combine'] ) ) {
-					$options['dont_combine'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['dont_combine'][ $type ][ $key ] );
-				}
-				$options['dont_combine'][ $type ] = array_unique( $options['dont_combine'][ $type ] );
-				$diff                             = array_merge(
-					array_diff( $current_options['dont_combine'][ $type ], $options['dont_combine'][ $type ] ),
-					array_diff( $options['dont_combine'][ $type ], $current_options['dont_combine'][ $type ] )
-				);
-
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-
-				$key = array_search( $handle, $options['defer'][ $type ], true );
-				if ( ! isset( $item['defer'] ) && false !== $key ) {
-					unset( $options['defer'][ $type ][ $key ] );
-				} elseif ( isset( $item['defer'] ) ) {
-					$options['defer'][ $type ][] = $handle;
-				}
-				$options['defer'][ $type ] = array_unique( $options['defer'][ $type ] );
-				$diff                      = array_merge(
-					array_diff( $current_options['defer'][ $type ], $options['defer'][ $type ] ),
-					array_diff( $options['defer'][ $type ], $current_options['defer'][ $type ] )
-				);
-
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-
-				$key = array_search( $handle, $options['inline'][ $type ], true );
-				if ( ! isset( $item['inline'] ) && false !== $key ) {
-					unset( $options['inline'][ $type ][ $key ] );
-				} elseif ( isset( $item['inline'] ) ) {
-					$options['inline'][ $type ][] = $handle;
-				}
-				$options['inline'][ $type ] = array_unique( $options['inline'][ $type ] );
-				$diff                       = array_merge(
-					array_diff( $current_options['inline'][ $type ], $options['inline'][ $type ] ),
-					array_diff( $options['inline'][ $type ], $current_options['inline'][ $type ] )
-				);
-
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-
-				if ( empty( $item['position'] ) ) {
-					$item['position'] = 'header';
-				}
-				$key_exists = array_key_exists( $handle, $options['position'][ $type ] );
-				if ( 'footer' === $item['position'] ) {
-					$options['position'][ $type ][ $handle ] = $item['position'];
-				} elseif ( $key_exists ) {
-					unset( $options['position'][ $type ][ $handle ] );
-				}
-				if ( $diff = array_diff_key( $current_options['position'][ $type ], $options['position'][ $type ] ) ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-				$diff = array_merge(
-					array_diff_key( $current_options['position'][ $type ], $options['position'][ $type ] ),
-					array_diff_key( $options['position'][ $type ], $current_options['position'][ $type ] )
-				);
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle => $position ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
+			/**
+			 * This is wrong. Instead of treating the options as "In footer" with values "true" or "false", we
+			 * treat this as "Location" with a value of "footer" (will never be header).
+			 *
+			 * TODO: change this up to match the $unset_asset_options logic above.
+			 */
+			$key_exists = array_key_exists( $handle, $options['position'][ $type ] );
+			if ( isset( $item['position'] ) && 'footer' === $item['position'] && ! $key_exists ) {
+				$options['position'][ $type ][ $handle ] = $item['position'];
+				array_push( $changed_assets, $handle );
+			} elseif ( ! isset( $item['position'] ) && $key_exists ) {
+				unset( $options['position'][ $type ][ $handle ] );
+				array_push( $changed_assets, $handle );
 			}
 		}
 
-		foreach ( $changed_groups as $group ) {
-			/**
-			 * Delete those groups.
-			 *
-			 * @var Minify_Group $group
-			 */
-			$group->delete_file();
+		$changed_assets = array_unique( $changed_assets );
+		foreach ( $changed_assets as $asset ) {
+			$changed_groups = Minify_Group::get_groups_from_handle( $asset, $type );
+			foreach ( $changed_groups as $group ) {
+				/**
+				 * Delete those groups.
+				 *
+				 * @var Minify_Group $group
+				 */
+				$group->delete_file();
+			}
 		}
 
 		return $options;

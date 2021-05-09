@@ -12,6 +12,7 @@ namespace Hummingbird\Admin\Pages;
 use Hummingbird\Admin\Page;
 use Hummingbird\Core\Integration\Opcache;
 use Hummingbird\Core\Module_Server;
+use Hummingbird\Core\Modules\Caching\Preload;
 use Hummingbird\Core\Modules\Page_Cache;
 use Hummingbird\Core\Settings;
 use Hummingbird\Core\Utils;
@@ -501,6 +502,8 @@ class Caching extends Page {
 	 * Caching summary meta box.
 	 */
 	public function caching_summary() {
+		$preloader = new Preload();
+
 		$this->view(
 			'caching/summary-meta-box',
 			array(
@@ -509,7 +512,7 @@ class Caching extends Page {
 				'issues'          => $this->issues,
 				'gravatar'        => Utils::get_module( 'gravatar' )->is_active(),
 				'rss'             => Settings::get_setting( 'duration', 'rss' ),
-				'preload_running' => get_transient( 'wphb-preloading' ),
+				'preload_running' => $preloader->is_process_running(),
 				'preload_active'  => Settings::get_setting( 'preload', 'page_cache' ),
 			)
 		);
@@ -561,6 +564,7 @@ class Caching extends Page {
 				'wphb-caching-actions'
 			),
 			'minify_active'  => Utils::get_module( 'minify' )->is_active(),
+			'cdn_active'     => Utils::get_module( 'minify' )->get_cdn_status(),
 		);
 
 		if ( ( is_multisite() && is_network_admin() ) || ! is_multisite() ) {

@@ -142,6 +142,12 @@ import CacheScanner from '../scanners/CacheScanner';
 				self.setServer( value );
 				self.selectedServer = value;
 				$( '.hb-server-type' ).val( value );
+
+				// Remove the expiry time settings row for IIS servers.
+				const expiryRow = document.getElementById(
+					'wphb-expiry-time-row'
+				);
+				expiryRow.style.display = 'iis' === value || 'litespeed' === value ? 'none' : 'flex';
 			} );
 
 			// Expiry time change between all types and individual type.

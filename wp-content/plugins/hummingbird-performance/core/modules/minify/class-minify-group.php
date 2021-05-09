@@ -1438,12 +1438,20 @@ class Minify_Group {
 	 *
 	 * @since  1.7.0
 	 * @access private
-	 * @param  bool $in_footer  Is in footer or not.
+	 *
+	 * @param bool $in_footer     Is in footer or not.
+	 * @param bool $rewrite_urls  Rewrite URLs (only required for inlining assets that are not processed by minify engine).
+	 *
 	 * @return bool True if successful, false if not.
 	 */
-	private function inline_group( $in_footer ) {
+	private function inline_group( $in_footer, $rewrite_urls = false ) {
 		// Get file content.
 		$content = $this->get_group_post_content();
+
+		if ( $rewrite_urls ) {
+			$path    = $this->get_handle_url( $this->group_id );
+			$content = URI_Rewriter::prepend( $content, trailingslashit( dirname( $path ) ) );
+		}
 
 		// If content is empty - return back to enqueue the file.
 		if ( empty( $content ) ) {
@@ -1662,7 +1670,7 @@ class Minify_Group {
 			if ( $this->is_inlined() ) {
 				wp_dequeue_style( $this->group_id );
 				wp_deregister_style( $this->group_id );
-				$inlined = $this->inline_group( $in_footer );
+				$inlined = $this->inline_group( $in_footer, true );
 			}
 
 			// Enqueue generated asset if not inlined.

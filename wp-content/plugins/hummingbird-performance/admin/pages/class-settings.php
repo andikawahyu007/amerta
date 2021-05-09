@@ -25,10 +25,10 @@ class Settings extends Page {
 	 */
 	public function on_load() {
 		$this->tabs = array(
-			'general' 		=> __( 'General', 'wphb' ),
+			'general'       => __( 'General', 'wphb' ),
 			'import_export' => __( 'Import / Export', 'wphb' ),
-			'data'    		=> __( 'Data & Settings', 'wphb' ),
-			'main'    		=> __( 'Accessibility', 'wphb' ),
+			'data'          => __( 'Data & Settings', 'wphb' ),
+			'main'          => __( 'Accessibility', 'wphb' ),
 		);
 	}
 

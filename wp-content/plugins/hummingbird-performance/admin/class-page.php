@@ -234,10 +234,6 @@ abstract class Page {
 		// Styles.
 		wp_enqueue_style( 'wphb-admin', WPHB_DIR_URL . 'admin/assets/css/wphb-app.min.css', array(), WPHB_VERSION );
 
-		if ( version_compare( $wp_version, '5.2', '<' ) ) {
-			wp_enqueue_script( 'clipboard', WPHB_DIR_URL . 'admin/assets/js/wphb-clipboard.min.js', array(), WPHB_VERSION, true );
-		}
-
 		// Scripts.
 		wp_enqueue_script(
 			'wphb-wpmudev-sui',

@@ -95,7 +95,7 @@ class Page_Cache extends Module {
 
 		add_action( 'init', array( $this, 'init_preloader' ) );
 		// Preload page cache on post/page update.
-		add_action( 'wphb_clear_cache_url', array( new Preload(), 'preload_page_on_purge' ) );
+		add_action( 'wphb_page_cache_preload_page', array( new Preload(), 'preload_page_on_purge' ) );
 
 		/**
 		 * Trigger a cache clear.
@@ -1308,16 +1308,20 @@ class Page_Cache extends Module {
 	 * @used-by Page_Cache::purge_post_cache()
 	 * @used-by Page_Cache::post_edit()
 	 * @used-by Page_Cache::post_status_change()
-	 * @param   string $directory  Directory to remove.
+	 *
+	 * @param string $directory  Directory to remove.
+	 * @param bool   $single     Make sure we only clear out a single directory for posts that are set as a site homepage.
 	 *
 	 * @return bool
 	 */
-	public function clear_cache( $directory = '' ) {
+	public function clear_cache( $directory = '', $single = false ) {
 		global $wphb_fs;
 
 		if ( ! $wphb_fs ) {
 			$wphb_fs = Filesystem::instance();
 		}
+
+		$skip_subdirs = true;
 
 		$directory_origin = $directory;
 
@@ -1341,6 +1345,7 @@ class Page_Cache extends Module {
 		if ( is_multisite() && ! $is_network_admin && ! $directory ) {
 			$current_blog = get_site( get_current_blog_id() );
 			$directory    = $current_blog->path;
+			$skip_subdirs = false; // We are clearing all cache.
 		}
 
 		// Purge whole cache directory.
@@ -1352,7 +1357,8 @@ class Page_Cache extends Module {
 			$status = $wphb_fs->purge();
 
 			$options = $this->get_options();
-			if ( isset( $options['preload'] ) && $options['preload'] ) {
+
+			if ( isset( $options['preload'] ) && $options['preload'] && isset( $options['preload_type'] ) && isset( $options['preload_type']['home_page'] ) && $options['preload_type']['home_page'] ) {
 				$preload = new Preload();
 				$preload->preload_home_page();
 			}
@@ -1363,7 +1369,22 @@ class Page_Cache extends Module {
 		}
 
 		// Purge specific folder.
-		$http_host = isset( $_SERVER['HTTP_HOST'] ) ? htmlentities( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // Input var ok.
+		$http_host = '';
+		if ( isset( $_SERVER['HTTP_HOST'] ) ) {
+			$http_host = htmlentities( wp_unslash( $_SERVER['HTTP_HOST'] ) ); // Input var ok.
+		} elseif ( function_exists( 'get_option' ) ) {
+			$http_host = preg_replace( '/https?:\/\//', '', get_option( 'siteurl' ) );
+		}
+
+		/**
+		 * Filter the HTTP_HOST value.
+		 *
+		 * @param string $http_host  Current HTTP host value.
+		 *
+		 * @since 2.7.3
+		 */
+		$http_host = apply_filters( 'wphb_page_cache_http_host', $http_host );
+
 
 		$cache_dir = $http_host . $directory;
 		$full_path = $wphb_fs->cache_dir . $cache_dir;
@@ -1387,12 +1408,12 @@ class Page_Cache extends Module {
 		// Decrease cached pages count by 1.
 		$count = Settings::get_setting( 'pages_cached', 'page_cache' );
 
-		if ( $wphb_fs->purge( 'cache/' . $http_host . '/mobile' . $directory ) ) {
+		if ( $wphb_fs->purge( 'cache/' . $http_host . '/mobile' . $directory, false, $skip_subdirs ) ) {
 			self::log_msg( 'Mobile cache has been cleared.' );
 			Settings::update_setting( 'pages_cached', --$count, 'page_cache' );
 		}
 
-		$status = $wphb_fs->purge( 'cache/' . $cache_dir );
+		$status = $wphb_fs->purge( 'cache/' . $cache_dir, false, $skip_subdirs );
 		if ( $status ) {
 			Settings::update_setting( 'pages_cached', --$count, 'page_cache' );
 		}
@@ -1421,8 +1442,12 @@ class Page_Cache extends Module {
 			$permalink = preg_replace( '/__trashed(-?)(\d*)\/$/', '/', $permalink );
 		}
 
-		$this->clear_cache( $permalink );
+		// When we have a static page as a home directory, we need to make sure that we do not clear all the other subfolders.
+		$force_single_clear = '/' === $permalink;
+
+		$this->clear_cache( $permalink, $force_single_clear );
 		self::log_msg( 'Cache has been purged for post id: ' . $post_id );
+		do_action( 'wphb_page_cache_preload_page', $permalink );
 
 		// Clear categories and tags pages if cached.
 		$meta_array = array(

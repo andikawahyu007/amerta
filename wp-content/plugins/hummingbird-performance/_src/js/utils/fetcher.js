@@ -257,12 +257,11 @@ function Fetcher() {
 			 * Toggle minification advanced mode.
 			 *
 			 * @param {string}  value
-			 * @param {boolean} clear
 			 * @param {boolean} hide
 			 */
-			toggleView: ( value, clear, hide ) => {
+			toggleView: ( value, hide ) => {
 				const action = actionPrefix + 'minification_toggle_view';
-				return request( action, { value, clear, hide }, 'POST' );
+				return request( action, { value, hide }, 'POST' );
 			},
 
 			/**

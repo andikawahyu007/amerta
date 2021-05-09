@@ -243,6 +243,10 @@ class Admin {
 			$this->pages['wphb-settings'] = new Pages\Settings( 'wphb-settings', __( 'Settings', 'wphb' ), __( 'Settings', 'wphb' ), 'wphb' );
 		}
 
+		if ( ! apply_filters( 'wpmudev_branding_hide_doc_link', false ) ) {
+			$this->pages['wphb-tutorials'] = new Pages\React\Tutorials( 'wphb-tutorials', __( 'Tutorials', 'wphb' ), __( 'Tutorials', 'wphb' ), 'wphb' );
+		}
+
 		if ( ! Utils::is_member() && ! is_multisite() ) {
 			$this->pages['wphb-upgrade'] = new Pages\Upgrade( 'wphb-upgrade', __( 'Hummingbird Pro', 'wphb' ), __( 'Hummingbird Pro', 'wphb' ), 'wphb' );
 		}
@@ -263,6 +267,10 @@ class Admin {
 		$this->pages['wphb-advanced']     = new Pages\Advanced( 'wphb-advanced', __( 'Advanced Tools', 'wphb' ), __( 'Advanced Tools', 'wphb' ), 'wphb' );
 		$this->pages['wphb-uptime']       = new Pages\Uptime( 'wphb-uptime', __( 'Uptime', 'wphb' ), __( 'Uptime', 'wphb' ), 'wphb' );
 		$this->pages['wphb-settings']     = new Pages\Settings( 'wphb-settings', __( 'Settings', 'wphb' ), __( 'Settings', 'wphb' ), 'wphb' );
+
+		if ( ! apply_filters( 'wpmudev_branding_hide_doc_link', false ) ) {
+			$this->pages['wphb-tutorials'] = new Pages\React\Tutorials( 'wphb-tutorials', __( 'Tutorials', 'wphb' ), __( 'Tutorials', 'wphb' ), 'wphb' );
+		}
 
 		if ( ! Utils::is_member() ) {
 			$this->pages['wphb-upgrade'] = new Pages\Upgrade( 'wphb-upgrade', __( 'Hummingbird Pro', 'wphb' ), __( 'Hummingbird Pro', 'wphb' ), 'wphb' );
@@ -379,6 +387,7 @@ class Admin {
 			update_option( 'wphb_run_onboarding', true );
 			update_option( 'wphb-minification-show-config_modal', true );
 			update_option( 'wphb-minification-show-advanced_modal', true );
+			delete_option( 'wphb-hide-tutorials' );
 
 			// Clean all cron.
 			wp_clear_scheduled_hook( 'wphb_performance_report' );

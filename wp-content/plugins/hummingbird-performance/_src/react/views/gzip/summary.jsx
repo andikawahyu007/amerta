@@ -130,15 +130,30 @@ class GzipSummary extends React.Component {
 			return 'privacy' === item;
 		} );
 
-		if ( 1 === privacyFail.length ) {
+		if ( 0 < privacyFail.length ) {
 			classes = 'sui-notice-info';
 			text = sprintf(
 				/* translators: %d - number of active types */
-				__(
-					"GZip compression is currently active for %d/3 types. We've detected you have Privacy Mode active which prevents us from accurately detecting whether HTML compression is active or not. You can re-check this when you've disabled Privacy Mode."
-				),
-				failedGzip.length
+				__( 'GZip compression is currently active for %d/3 types.' ),
+				3 - failedGzip.length
 			);
+
+			if (
+				'undefined' !== typeof this.props.status.HTML &&
+				'privacy' === this.props.status.HTML
+			) {
+				text +=
+					' ' +
+					__(
+						'We’ve detected that you have Privacy Mode active which prevents us from accurately detecting whether HTML compression is active or not. That is to say, an HTTP 401 Unauthorized Client status was detected and your site requires valid HTTP authentication credentials. You can re-check this once you have tended to the HTTP 401 error.'
+					);
+			} else {
+				text +=
+					' ' +
+					__(
+						'We’ve detected an HTTP error that prevents us from accurately detecting whether HTML compression is active or not. You can re-check this once you have tended to the HTTP error.'
+					);
+			}
 		} else if ( 0 === failedGzip.length ) {
 			classes = 'sui-notice-success';
 			text = __( 'Gzip compression is currently active. Good job!' );
@@ -166,7 +181,7 @@ class GzipSummary extends React.Component {
 			let label = __( 'Inactive' );
 			let tag = 'warning';
 
-			if ( item[ 1 ] ) {
+			if ( true === item[ 1 ] ) {
 				label = __( 'Active' );
 				tag = 'success';
 			}
@@ -197,7 +212,7 @@ class GzipSummary extends React.Component {
 				item[ 0 ]
 			);
 
-			if ( 'privacy' === item[ 0 ] ) {
+			if ( 'privacy' === item[ 1 ] ) {
 				tooltipText = __(
 					'While Privacy Mode is active, we can’t accurately detect if HTML compression is active and working. Re-check this once you’ve disabled Privacy Mode.'
 				);

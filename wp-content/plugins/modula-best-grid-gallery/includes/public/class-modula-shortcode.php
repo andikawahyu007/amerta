@@ -94,7 +94,8 @@ class Modula_Shortcode {
 		}
 
 		/* Get gallery settings */
-		$settings = get_post_meta( $atts['id'], 'modula-settings', true );
+		$settings = apply_filters('modula_backwards_compatibility_front',get_post_meta( $atts['id'], 'modula-settings', true ));
+
 		$default  = Modula_CPT_Fields_Helper::get_defaults();
 		$settings = wp_parse_args( $settings, $default );
 
